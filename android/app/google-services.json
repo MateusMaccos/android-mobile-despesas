@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "269647096174",
+    "project_id": "appdespesas-e75c5",
+    "storage_bucket": "appdespesas-e75c5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269647096174:android:6eda50ee15c193ee1e797f",
+        "android_client_info": {
+          "package_name": "com.example.despesas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269647096174-l383u1laq162l606fugav7ovg20j4b23.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYzdhoCNpw2Aiux70v7qLTQ878kWsbkXw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269647096174-l383u1laq162l606fugav7ovg20j4b23.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
