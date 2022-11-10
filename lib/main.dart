@@ -114,7 +114,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }).toList();
   }
 
-  _addTransaction(String title, double value, DateTime date) {
+  _addTransaction(String title, double value, DateTime date,
+      {fromFirebase = false}) {
     final newTransaction = Transacao(
         id: Random().nextDouble().toString(),
         title: title,
@@ -124,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     setState(() {
       _transactions.add(newTransaction);
     });
-    Navigator.of(context).pop();
+    if (fromFirebase == false) Navigator.of(context).pop();
   }
 
   _deleteTransaction(String id) {
@@ -166,10 +167,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         appBar.preferredSize.height -
         mediaQuery.padding.top;
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return StreamBuilder<QuerySnapshot>(
         stream: FirebaseService().streamTransaction(),
-        builder: (context,
-            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+        builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
             case ConnectionState.waiting:
@@ -177,13 +177,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   appBar: appBar,
                   body: const Center(child: CircularProgressIndicator()));
             default:
-              List<DocumentSnapshot> TransactionDocs = snapshot.data!.docs;
+              List<QueryDocumentSnapshot> TransactionDocs = snapshot.data!.docs;
               TransactionDocs.isNotEmpty
-                  ? snapshot.data!.docs.map((DocumentSnapshot tr) {
+                  ? TransactionDocs.map((QueryDocumentSnapshot tr) {
                       Map<String, dynamic> dataTransaction =
-                          tr.data() as Map<String, dynamic>;
-                      Transacao transacao = Transacao.fromJson(dataTransaction);
-                      _transactions.add(transacao);
+                          tr.data()! as Map<String, dynamic>;
+                      print(dataTransaction['title']);
                     })
                   : print('Documento Vazio');
               return Scaffold(

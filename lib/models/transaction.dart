@@ -15,7 +15,7 @@ class Transacao {
   Transacao.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     value = json['value'];
-    date = json['date'];
+    date = (json['date'] as Timestamp).toDate();
   }
 
   Map<String, dynamic> toJson() {
