@@ -1,12 +1,19 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:despesas/components/chart.dart';
 import 'package:despesas/components/transaction_form.dart';
+import 'package:despesas/service/firebase.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'components/transaction_list.dart';
 import 'models/transaction.dart';
 
-main() => runApp(const ExpensesApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const ExpensesApp());
+}
 
 class ExpensesApp extends StatelessWidget {
   const ExpensesApp({super.key});
@@ -50,7 +57,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  final List<Transaction> _transactions = [
+  final List<Transacao> _transactions = [
     /* Transaction(
         id: Random().nextDouble().toString(),
         title: 'Conta #id',
@@ -101,14 +108,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
   }
 
-  List<Transaction> get _recentTransactions {
+  List<Transacao> get _recentTransactions {
     return _transactions.where((tr) {
       return tr.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
   }
 
   _addTransaction(String title, double value, DateTime date) {
-    final newTransaction = Transaction(
+    final newTransaction = Transacao(
         id: Random().nextDouble().toString(),
         title: title,
         value: value,
@@ -159,47 +166,71 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         appBar.preferredSize.height -
         mediaQuery.padding.top;
 
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            /* if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Exibir Gráfico'),
-                  Switch.adaptive(
-                      activeColor: Theme.of(context).primaryColor,
-                      value: _showChart,
-                      onChanged: ((value) {
-                        setState(() {
-                          _showChart = value;
-                        });
-                      })),
-                ],
-              ), */
-            if (_showChart || !isLandscape)
-              SizedBox(
-                height: availableHeight * (isLandscape ? 0.7 : 0.3),
-                child: Chart(_recentTransactions),
-              ),
-            if (!_showChart || !isLandscape)
-              SizedBox(
-                height: availableHeight * (isLandscape ? 1 : 0.7),
-                child: TransactionList(_transactions, _deleteTransaction),
-              )
-          ],
-        ),
-      ),
-      floatingActionButton: Platform.isIOS
-          ? Container()
-          : FloatingActionButton(
-              onPressed: () => _openTransactionFormModal(context),
-              child: const Icon(Icons.add),
-            ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseService().streamTransaction(),
+        builder: (context,
+            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return Scaffold(
+                  appBar: appBar,
+                  body: const Center(child: CircularProgressIndicator()));
+            default:
+              List<DocumentSnapshot> TransactionDocs = snapshot.data!.docs;
+              TransactionDocs.isNotEmpty
+                  ? snapshot.data!.docs.map((DocumentSnapshot tr) {
+                      Map<String, dynamic> dataTransaction =
+                          tr.data() as Map<String, dynamic>;
+                      Transacao transacao = Transacao.fromJson(dataTransaction);
+                      _transactions.add(transacao);
+                    })
+                  : print('Documento Vazio');
+              return Scaffold(
+                appBar: appBar,
+                body: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      /* if (isLandscape)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Exibir Gráfico'),
+                      Switch.adaptive(
+                          activeColor: Theme.of(context).primaryColor,
+                          value: _showChart,
+                          onChanged: ((value) {
+                            setState(() {
+                              _showChart = value;
+                            });
+                          })),
+                    ],
+                  ), */
+                      if (_showChart || !isLandscape)
+                        SizedBox(
+                          height: availableHeight * (isLandscape ? 0.7 : 0.3),
+                          child: Chart(_recentTransactions),
+                        ),
+                      if (!_showChart || !isLandscape)
+                        SizedBox(
+                          height: availableHeight * (isLandscape ? 1 : 0.7),
+                          child: TransactionList(
+                              _transactions, _deleteTransaction),
+                        )
+                    ],
+                  ),
+                ),
+                floatingActionButton: Platform.isIOS
+                    ? Container()
+                    : FloatingActionButton(
+                        onPressed: () => _openTransactionFormModal(context),
+                        child: const Icon(Icons.add),
+                      ),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerFloat,
+              );
+          }
+        });
   }
 }

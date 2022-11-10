@@ -12,7 +12,7 @@ class TransactionItem extends StatefulWidget {
     required this.onRemove,
   }) : super(key: key);
 
-  final Transaction t;
+  final Transacao t;
   final void Function(String p1) onRemove;
 
   @override
