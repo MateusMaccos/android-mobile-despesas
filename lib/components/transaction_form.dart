@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
-  final void Function(String, double, DateTime) onSubmit;
+  final void Function(
+    String,
+    double,
+    DateTime,
+  ) onSubmit;
   TransactionForm(this.onSubmit, {super.key}) {
     print('Constructor TransactionForm');
   }
 
   @override
+  // ignore: no_logic_in_create_state
   State<TransactionForm> createState() {
     print('createState TransactionForm');
     return _TransactionFormState();

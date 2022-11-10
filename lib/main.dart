@@ -57,6 +57,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+  bool inicializou = false;
   final List<Transacao> _transactions = [
     /* Transaction(
         id: Random().nextDouble().toString(),
@@ -117,19 +118,24 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   _addTransaction(String title, double value, DateTime date,
       {fromFirebase = false}) {
     final newTransaction = Transacao(
-        id: Random().nextDouble().toString(),
-        title: title,
-        value: value,
-        date: date);
-
-    setState(() {
+      id: Random().nextDouble().toString(),
+      title: title,
+      value: value,
+      date: date,
+    );
+    if (fromFirebase == false) {
+      setState(() {
+        FirebaseService().addTransaction(newTransaction.toJson());
+      });
+      Navigator.of(context).pop();
+    } else {
       _transactions.add(newTransaction);
-    });
-    if (fromFirebase == false) Navigator.of(context).pop();
+    }
   }
 
   _deleteTransaction(String id) {
     setState(() {
+      // FirebaseService().deleteTransaction(id);
       _transactions.removeWhere((t) => t.id == id);
     });
   }
@@ -141,6 +147,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         return TransactionForm(_addTransaction);
       },
     );
+  }
+
+  _carregaLista(List<DocumentSnapshot> transacoes) {
+    _transactions.clear();
+    transacoes.forEach((DocumentSnapshot tr) {
+      Map<String, dynamic> infoTransacao = tr.data()! as Map<String, dynamic>;
+      infoTransacao['id'] = tr.id;
+      Transacao transacao = Transacao.fromJson(infoTransacao);
+      _addTransaction(transacao.title, transacao.value, transacao.date,
+          fromFirebase: true);
+    });
   }
 
   @override
@@ -167,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         appBar.preferredSize.height -
         mediaQuery.padding.top;
 
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseService().streamTransaction(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -177,14 +194,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   appBar: appBar,
                   body: const Center(child: CircularProgressIndicator()));
             default:
-              List<QueryDocumentSnapshot> TransactionDocs = snapshot.data!.docs;
-              TransactionDocs.isNotEmpty
-                  ? TransactionDocs.map((QueryDocumentSnapshot tr) {
-                      Map<String, dynamic> dataTransaction =
-                          tr.data()! as Map<String, dynamic>;
-                      print(dataTransaction['title']);
-                    })
-                  : print('Documento Vazio');
+              if (snapshot.hasError) {
+                return const Text('Algum erro ocorreu!');
+              }
+              List<DocumentSnapshot<Map<String, dynamic>>> TransactionDocs =
+                  snapshot.data!.docs;
+              _carregaLista(TransactionDocs);
               return Scaffold(
                 appBar: appBar,
                 body: SingleChildScrollView(

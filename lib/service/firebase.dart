@@ -15,4 +15,13 @@ class FirebaseService {
         .then((value) => print('Transação Adicionada!'))
         .catchError((e) => print('Falhou, $e'));
   }
+
+  Future<void> deleteTransaction(String id) async {
+    _db
+        .collection(_stringTransaction)
+        .doc(id)
+        .delete()
+        .then((value) => print('Transação Deletada!'))
+        .catchError((e) => print('Falhou, $e'));
+  }
 }
