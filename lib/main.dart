@@ -115,27 +115,31 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }).toList();
   }
 
-  _addTransaction(String title, double value, DateTime date,
-      {fromFirebase = false}) {
+  _addTransaction(
+    String title,
+    double value,
+    DateTime date,
+  ) {
     final newTransaction = Transacao(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
       date: date,
     );
-    if (fromFirebase == false) {
-      setState(() {
-        FirebaseService().addTransaction(newTransaction.toJson());
-      });
-      Navigator.of(context).pop();
-    } else {
-      _transactions.add(newTransaction);
-    }
+
+    setState(() {
+      FirebaseService().addTransaction(newTransaction.toJson());
+    });
+    Navigator.of(context).pop();
+  }
+
+  _addTransactionByObject(Transacao transacao) {
+    _transactions.add(transacao);
   }
 
   _deleteTransaction(String id) {
     setState(() {
-      // FirebaseService().deleteTransaction(id);
+      FirebaseService().deleteTransaction(id);
       _transactions.removeWhere((t) => t.id == id);
     });
   }
@@ -155,8 +159,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       Map<String, dynamic> infoTransacao = tr.data()! as Map<String, dynamic>;
       infoTransacao['id'] = tr.id;
       Transacao transacao = Transacao.fromJson(infoTransacao);
-      _addTransaction(transacao.title, transacao.value, transacao.date,
-          fromFirebase: true);
+      _addTransactionByObject(transacao);
     });
   }
 

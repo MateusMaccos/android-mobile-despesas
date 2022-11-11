@@ -31,20 +31,13 @@ class _TransactionItemState extends State<TransactionItem> {
   late Color _backgroundColor;
 
   @override
-  void initState() {
-    super.initState();
-    int i = Random().nextInt(5);
-    _backgroundColor = colors[i];
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _backgroundColor,
+          backgroundColor: Theme.of(context).primaryColor,
           radius: 30,
           child: Padding(
             padding: const EdgeInsets.all(6),

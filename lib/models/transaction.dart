@@ -13,6 +13,7 @@ class Transacao {
       required this.date});
 
   Transacao.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     title = json['title'];
     value = json['value'];
     date = (json['date'] as Timestamp).toDate();
