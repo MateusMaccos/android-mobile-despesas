@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:despesas/components/chart.dart';
+import 'package:despesas/components/fatura_form.dart';
 import 'package:despesas/components/transaction_form.dart';
 import 'package:despesas/service/firebase.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -107,6 +108,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     Navigator.of(context).pop();
   }
 
+  _addFatura(
+    double value,
+  ) {
+    setState(() {
+      FirebaseService().addFaturaAtual(value);
+    });
+    Navigator.of(context).pop();
+  }
+
   _addTransactionByObject(Transacao transacao) {
     _transactions.add(transacao);
   }
@@ -123,6 +133,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       context: context,
       builder: (_) {
         return TransactionForm(_addTransaction);
+      },
+    );
+  }
+
+  _openFaturaFormModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return FaturaForm(_addFatura);
       },
     );
   }
@@ -163,6 +182,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       backgroundColor: Theme.of(context).primaryColor,
       title: const Text('Despesas Pessoais'),
       actions: [
+        IconButton(
+            onPressed: () => _openFaturaFormModal(context),
+            icon: const Icon(
+              Icons.payment,
+              color: Colors.white,
+            )),
         if (isLandscape)
           IconButton(
               onPressed: () {

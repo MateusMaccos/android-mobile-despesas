@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirebaseService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   static const String _stringTransaction = 'Transactions';
+  static const String _stringFatura = 'Fatura';
 
   Stream<QuerySnapshot<Map<String, dynamic>>> streamTransaction() {
     return _db.collection(_stringTransaction).snapshots();
@@ -13,6 +14,14 @@ class FirebaseService {
         .collection(_stringTransaction)
         .add(dataTransaction)
         .then((value) => print('Transação Adicionada!'))
+        .catchError((e) => print('Falhou, $e'));
+  }
+
+  Future<void> addFaturaAtual(double valor) async {
+    _db
+        .collection(_stringFatura)
+        .add({'Valor': valor, 'Dono': 'Mateus'})
+        .then((value) => print("Fatura adicionada!"))
         .catchError((e) => print('Falhou, $e'));
   }
 
