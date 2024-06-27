@@ -18,19 +18,10 @@ class TransactionItem extends StatefulWidget {
 }
 
 class _TransactionItemState extends State<TransactionItem> {
-  static const colors = [
-    Colors.red,
-    Colors.purple,
-    Colors.orange,
-    Colors.blue,
-    Colors.black,
-  ];
-
-  late Color _backgroundColor;
-
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: widget.t.minha ? Colors.white : Colors.amber,
       elevation: 5,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
       child: ListTile(
@@ -41,28 +32,30 @@ class _TransactionItemState extends State<TransactionItem> {
             padding: const EdgeInsets.all(6),
             child: FittedBox(
                 child: Text(
-                    'R\$${widget.t.value.toStringAsFixed(2).replaceAll('.', ',')}')),
+              'R\$${widget.t.value.toStringAsFixed(2).replaceAll('.', ',')}',
+              style: TextStyle(color: Colors.white),
+            )),
           ),
         ),
         title: Text(
           widget.t.title,
-          style: Theme.of(context).textTheme.headline6,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         subtitle: Text(DateFormat('d MMM y').format(widget.t.date)),
         trailing: MediaQuery.of(context).size.width > 480
             ? TextButton.icon(
                 onPressed: () => widget.onRemove(widget.t.id),
-                icon: Icon(
+                icon: const Icon(
                   Icons.delete,
-                  color: Theme.of(context).errorColor,
+                  color: Colors.redAccent,
                 ),
-                label: Text(
+                label: const Text(
                   'Excluir',
-                  style: TextStyle(color: Theme.of(context).errorColor),
+                  style: TextStyle(color: Colors.redAccent),
                 ))
             : IconButton(
                 icon: const Icon(Icons.delete),
-                color: Theme.of(context).errorColor,
+                color: Colors.redAccent,
                 onPressed: () => widget.onRemove(widget.t.id),
               ),
       ),

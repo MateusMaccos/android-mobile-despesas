@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
-  final void Function(
-    String,
-    double,
-    DateTime,
-  ) onSubmit;
+  final void Function(String, double, DateTime, bool) onSubmit;
   TransactionForm(this.onSubmit, {super.key}) {
     print('Constructor TransactionForm');
   }
@@ -25,6 +21,8 @@ class _TransactionFormState extends State<TransactionForm> {
   final valueController = TextEditingController();
 
   late DateTime? _selectedDate = DateTime.now();
+
+  bool ativo = true;
 
   _TransactionFormState() {
     print('Construtor _TransactionFormState');
@@ -54,7 +52,8 @@ class _TransactionFormState extends State<TransactionForm> {
     if (title.isEmpty || value <= 0 || _selectedDate == null) {
       return;
     }
-    widget.onSubmit(title, value, _selectedDate!);
+
+    widget.onSubmit(title, value, _selectedDate!, ativo);
   }
 
   _showDatePicker() {
@@ -119,6 +118,25 @@ class _TransactionFormState extends State<TransactionForm> {
                   ],
                 ),
               ),
+              SizedBox(
+                height: 70,
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Minha conta'),
+                    ),
+                    Switch(
+                      value: ativo,
+                      activeColor: Theme.of(context).primaryColor,
+                      onChanged: (bool value) {
+                        setState(() {
+                          ativo = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -129,7 +147,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     child: Text(
                       'Nova Transação',
                       style: TextStyle(
-                          color: Theme.of(context).textTheme.button?.color),
+                          color: Theme.of(context).textTheme.labelLarge?.color),
                     ),
                   ),
                 ],

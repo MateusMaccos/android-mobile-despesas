@@ -30,13 +30,14 @@ class ExpensesApp extends StatelessWidget {
           secondary: Colors.amber,
         ),
         textTheme: tema.textTheme.copyWith(
-            headline6: const TextStyle(
-              fontFamily: 'Quicksand',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-            button: const TextStyle(color: Colors.white)),
+          titleLarge: const TextStyle(
+            fontFamily: 'Quicksand',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          labelLarge: const TextStyle(color: Colors.white),
+        ),
         appBarTheme: const AppBarTheme(
           titleTextStyle: TextStyle(
             fontFamily: 'OpenSans',
@@ -58,39 +59,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool inicializou = false;
-  final List<Transacao> _transactions = [
-    /* Transaction(
-        id: Random().nextDouble().toString(),
-        title: 'Conta #id',
-        value: 24.56,
-        date: DateTime.now()),
-    Transaction(
-        id: Random().nextDouble().toString(),
-        title: 'Conta #id',
-        value: 24.56,
-        date: DateTime.now()),
-    Transaction(
-        id: Random().nextDouble().toString(),
-        title: 'Conta #id',
-        value: 24.56,
-        date: DateTime.now()),
-    Transaction(
-        id: Random().nextDouble().toString(),
-        title: 'Conta #id',
-        value: 24.56,
-        date: DateTime.now()),
-    Transaction(
-        id: Random().nextDouble().toString(),
-        title: 'Conta #id',
-        value: 24.56,
-        date: DateTime.now()),
-    Transaction(
-        id: Random().nextDouble().toString(),
-        title: 'Conta #id',
-        value: 24.56,
-        date: DateTime.now()), */
-  ];
+  final List<Transacao> _transactions = [];
   bool _showChart = false;
+  double meusGastos = 0;
+  double gastosTotais = 0;
 
   @override
   void initState() {
@@ -119,12 +91,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     String title,
     double value,
     DateTime date,
+    bool minha,
   ) {
     final newTransaction = Transacao(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
       date: date,
+      minha: minha,
     );
 
     setState(() {
@@ -155,12 +129,30 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   _carregaLista(List<DocumentSnapshot> transacoes) {
     _transactions.clear();
-    transacoes.forEach((DocumentSnapshot tr) {
+    for (var tr in transacoes) {
       Map<String, dynamic> infoTransacao = tr.data()! as Map<String, dynamic>;
       infoTransacao['id'] = tr.id;
       Transacao transacao = Transacao.fromJson(infoTransacao);
       _addTransactionByObject(transacao);
-    });
+    }
+  }
+
+  _somaTotal() {
+    double somatorio = 0;
+    for (var t in _transactions) {
+      somatorio += t.value;
+    }
+    gastosTotais = somatorio;
+  }
+
+  _somaMeusGastos() {
+    double somatorio = 0;
+    for (var t in _transactions) {
+      if (t.minha) {
+        somatorio += t.value;
+      }
+    }
+    meusGastos = somatorio;
   }
 
   @override
@@ -168,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     final mediaQuery = MediaQuery.of(context);
     bool isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = AppBar(
+      backgroundColor: Theme.of(context).primaryColor,
       title: const Text('Despesas Pessoais'),
       actions: [
         if (isLandscape)
@@ -177,10 +170,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   _showChart = !_showChart;
                 });
               },
-              icon: Icon(_showChart ? Icons.list : Icons.show_chart)),
+              icon: Icon(
+                _showChart ? Icons.list : Icons.show_chart,
+                color: Colors.white,
+              )),
         IconButton(
             onPressed: () => _openTransactionFormModal(context),
-            icon: const Icon(Icons.add)),
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+            )),
       ],
     );
     final availableHeight = mediaQuery.size.height -
@@ -203,30 +202,36 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               List<DocumentSnapshot<Map<String, dynamic>>> TransactionDocs =
                   snapshot.data!.docs;
               _carregaLista(TransactionDocs);
+              _somaMeusGastos();
+              _somaTotal();
               return Scaffold(
                 appBar: appBar,
                 body: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      /* if (isLandscape)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Exibir Gráfico'),
-                      Switch.adaptive(
-                          activeColor: Theme.of(context).primaryColor,
-                          value: _showChart,
-                          onChanged: ((value) {
-                            setState(() {
-                              _showChart = value;
-                            });
-                          })),
-                    ],
-                  ), */
+                      SizedBox(
+                          child: Card(
+                        elevation: 6,
+                        margin: const EdgeInsets.all(20),
+                        child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Text(
+                                  "Resumo",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Text("Mateus: $meusGastos"),
+                                Text("Ariadna: ${gastosTotais - meusGastos}"),
+                                Text("Total: $gastosTotais"),
+                              ],
+                            )),
+                      )),
                       if (_showChart || !isLandscape)
                         SizedBox(
-                          height: availableHeight * (isLandscape ? 0.7 : 0.3),
+                          height: availableHeight * (isLandscape ? 0.7 : 0.2),
                           child: Chart(_recentTransactions),
                         ),
                       if (!_showChart || !isLandscape)
