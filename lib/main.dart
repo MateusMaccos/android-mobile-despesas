@@ -224,9 +224,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) {
                 return const Text('Algum erro ocorreu!');
               }
-              List<DocumentSnapshot<Map<String, dynamic>>> TransactionDocs =
+              List<DocumentSnapshot<Map<String, dynamic>>> transactionDocs =
                   snapshot.data!.docs;
-              _carregaLista(TransactionDocs);
+              _carregaLista(transactionDocs);
               _somaMeusGastos();
               _somaTotal();
               return Scaffold(
@@ -251,6 +251,35 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                 Text("Mateus: $meusGastos"),
                                 Text("Ariadna: ${gastosTotais - meusGastos}"),
                                 Text("Total: $gastosTotais"),
+                                const Divider(),
+                                StreamBuilder(
+                                  stream: FirebaseService().getFaturaAtual(),
+                                  builder: (context, snapshot) {
+                                    switch (snapshot.connectionState) {
+                                      case ConnectionState.none:
+                                      case ConnectionState.waiting:
+                                        return const LinearProgressIndicator();
+                                      default:
+                                        if (snapshot.hasError) {
+                                          return const Text(
+                                              'Algum erro ocorreu!');
+                                        }
+                                        Map<String, dynamic> dadosDaFatura =
+                                            snapshot.data!.data()
+                                                as Map<String, dynamic>;
+                                        double fatura = dadosDaFatura['Valor'];
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text("Fatura: $fatura"),
+                                            Text(
+                                                "Fatura-Ariadna: ${fatura - gastosTotais - meusGastos}"),
+                                          ],
+                                        );
+                                    }
+                                  },
+                                ),
                               ],
                             )),
                       )),

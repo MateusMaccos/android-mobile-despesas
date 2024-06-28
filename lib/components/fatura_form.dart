@@ -70,7 +70,7 @@ class _FaturaFormState extends State<FaturaForm> {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor),
-                    onPressed: () {},
+                    onPressed: _submitForm,
                     child: Text(
                       'Adicionar Fatura',
                       style: TextStyle(

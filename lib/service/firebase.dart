@@ -17,11 +17,16 @@ class FirebaseService {
         .catchError((e) => print('Falhou, $e'));
   }
 
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getFaturaAtual() {
+    return _db.collection(_stringFatura).doc("FaturaAtual").snapshots();
+  }
+
   Future<void> addFaturaAtual(double valor) async {
     _db
         .collection(_stringFatura)
-        .add({'Valor': valor, 'Dono': 'Mateus'})
-        .then((value) => print("Fatura adicionada!"))
+        .doc('FaturaAtual')
+        .update({'Valor': valor})
+        .then((value) => print("Fatura atualizada!"))
         .catchError((e) => print('Falhou, $e'));
   }
 
